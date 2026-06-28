@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar - {{ quadra.nome }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 30px;
+            color: white;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .content { padding: 30px; }
+        .info-box {
+            background: #f0f2f5;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .info-item:last-child { border: none; }
+        .info-label { font-weight: 600; color: #555; }
+        .info-value { color: #333; font-weight: 500; }
+        .price { font-size: 1.3rem; color: #667eea; font-weight: 700; }
+        .form-group { margin-bottom: 25px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #555;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+        .horarios-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .horario-btn {
+            padding: 12px;
+            background: #f0f2f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .horario-btn:hover:not(.ocupado) {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        .horario-btn.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+        }
+        .horario-btn.ocupado {
+            background: #e74c3c;
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.7;
+            text-decoration: line-through;
+        }
+        .btn-confirm {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        .btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102,126,234,0.4); }
+        .btn-confirm:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            text-decoration: none;
+        }
+        .error {
+            background: #fee;
+            color: #e74c3c;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .ocupado-badge {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-calendar-plus"></i> Agendar Horário</h1>
+            <p>{{ quadra.nome }}</p>
+        </div>
+        <div class="content">
+            <div class="info-box">
+                <div class="info-item"><span class="info-label"><i class="fas fa-map-marker-alt"></i> Localização</span><span class="info-value">{{ quadra.localizacao }}</span></div>
+                <div class="info-item"><span class="info-label"><i class="fas fa-futbol"></i> Esporte</span><span class="info-value">{{ quadra.esporte }}</span></div>
+                <div class="info-item"><span class="info-label"><i class="fas fa-tag"></i> Preço</span><span class="info-value price">R$ {{ quadra.preco }}/hora</span></div>
+            </div>
+
+            {% if erro %}
+            <div class="error"><i class="fas fa-exclamation-circle"></i> {{ erro }}</div>
+            {% endif %}
+
+            <form method="POST" id="agendamentoForm">
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-day"></i> Data</label>
+                    <input type="date" name="data" id="data" min="{{ hoje }}" value="{{ data_selecionada }}" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-clock"></i> Horários Disponíveis</label>
+                    <div class="horarios-grid" id="horariosGrid">
+                        {% for h in quadra.horarios %}
+                            {% if h in ocupados %}
+                            <div class="horario-btn ocupado" data-horario="{{ h }}" disabled>
+                                {{ h }} <span class="ocupado-badge">ocupado</span>
+                            </div>
+                            {% else %}
+                            <div class="horario-btn" data-horario="{{ h }}">{{ h }}</div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="horario" id="horarioInput" required>
+                </div>
+                <button type="submit" class="btn-confirm" id="confirmBtn" disabled>
+                    <i class="fas fa-check-circle"></i> Confirmar Agendamento
+                </button>
+            </form>
+            <a href="/quadras" class="back-link"><i class="fas fa-arrow-left"></i> Voltar para quadras</a>
+        </div>
+    </div>
+
+    <script>
+        let selectedHorario = null;
+        
+        // Atualizar horários quando mudar a data
+        document.getElementById('data').addEventListener('change', function() {
+            window.location.href = `/agendar/{{ quadra.id }}?data=${this.value}`;
+        });
+        
+        // Selecionar horário (apenas os não ocupados)
+        document.querySelectorAll('.horario-btn:not(.ocupado)').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.horario-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedHorario = this.dataset.horario;
+                document.getElementById('horarioInput').value = selectedHorario;
+                document.getElementById('confirmBtn').disabled = false;
+            });
+        });
+        
+        // Validar antes de enviar
+        document.getElementById('agendamentoForm').addEventListener('submit', function(e) {
+            if (!selectedHorario) {
+                e.preventDefault();
+                alert('⚠️ Por favor, selecione um horário disponível!');
+            }
+        });
+    </script>
+</body>
+</html>

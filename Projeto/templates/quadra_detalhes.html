@@ -1,0 +1,62 @@
+ <!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ quadra.nome }} - DEAF Agendei+</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="navbar">
+        <a href="/" class="navbar-brand">🏆 DEAF Agendei+</a>
+        <div class="navbar-menu">
+            <span class="user-name">Olá, {{ session['usuario_nome'] }}</span>
+            <a href="/quadras">🏠 Quadras</a>
+            <a href="/meus_agendamentos">📋 Meus Agendamentos</a>
+            <a href="/perfil">👤 Perfil</a>
+            <a href="/logout" class="btn-sair">🚪 Sair</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div style="background: white; border-radius: 20px; overflow: hidden; margin-bottom: 2rem;">
+            <div style="height: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 6rem;">
+                {% if quadra.esporte == 'Futebol' %}⚽
+                {% elif quadra.esporte == 'Tênis' %}🎾
+                {% elif quadra.esporte == 'Vôlei' %}🏐
+                {% elif quadra.esporte == 'Society' %}🏟️
+                {% elif quadra.esporte == 'Beach Tennis' %}🏖️
+                {% elif quadra.esporte == 'Basquete' %}🏀
+                {% else %}🏆
+                {% endif %}
+            </div>
+            <div style="padding: 2rem;">
+                <h1 style="margin-bottom: 0.5rem;">{{ quadra.nome }}</h1>
+                <p style="color: #7f8c8d; margin-bottom: 1rem;">📍 {{ quadra.localizacao }}</p>
+                <div class="rating" style="margin-bottom: 1rem;">
+                    ⭐ {{ quadra.avaliacao }} ({{ quadra.total_avaliacoes }} avaliações)
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div class="preco" style="margin: 0;">R$ {{ quadra.preco }}/hora</div>
+                    <a href="/agendar/{{ quadra.id }}" class="btn btn-primary">📅 Agendar Agora</a>
+                </div>
+            </div>
+        </div>
+        
+        <div style="background: white; border-radius: 20px; padding: 2rem;">
+            <h3>📋 Informações da Quadra</h3>
+            <ul style="margin-top: 1rem; list-style: none;">
+                <li style="padding: 0.5rem 0;">✅ Quadra profissional</li>
+                <li style="padding: 0.5rem 0;">✅ Iluminação noturna</li>
+                <li style="padding: 0.5rem 0;">✅ Vestiários com chuveiro</li>
+                <li style="padding: 0.5rem 0;">✅ Estacionamento gratuito</li>
+                <li style="padding: 0.5rem 0;">✅ Bebedouro e lanchonete</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="/quadras" class="btn btn-outline" style="background:#ecf0f1;color:#333;">← Voltar para quadras</a>
+        </div>
+    </div>
+</body>
+</html>

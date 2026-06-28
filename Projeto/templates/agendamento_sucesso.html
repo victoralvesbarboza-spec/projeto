@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento Confirmado - DEAF Agendei+</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .check-icon {
+            font-size: 80px;
+            color: #00b894;
+            margin-bottom: 20px;
+        }
+        .success-title {
+            color: #00b894;
+            margin-bottom: 20px;
+        }
+        .details-box {
+            background: #f0f2f5;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .details-box p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .details-box strong {
+            color: #2c3e50;
+        }
+        .codigo {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #00b894;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .btn-primary {
+            background: #00b894;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-secondary {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        @media (max-width: 768px) {
+            .success-container {
+                margin: 20px;
+                padding: 20px;
+            }
+            .buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="check-icon">✅</div>
+        <h1 class="success-title">Agendamento Confirmado!</h1>
+        <p>Sua reserva foi realizada com sucesso.</p>
+        
+        <div class="details-box">
+            <h3 style="margin-bottom: 15px;">📋 Detalhes do Agendamento</h3>
+            <p><strong>🏟️ Quadra:</strong> {{ agendamento.quadra_nome }}</p>
+            <p><strong>📅 Data:</strong> {{ agendamento.data }}</p>
+            <p><strong>⏰ Horário:</strong> {{ agendamento.horario }}</p>
+            <p><strong>💰 Valor:</strong> R$ {{ agendamento.valor_total }}</p>
+            <p><strong>🔑 Código da reserva:</strong></p>
+            <div class="codigo">{{ agendamento.codigo }}</div>
+            <p><strong>📝 Status:</strong> <span style="color: #00b894;">✓ Confirmado</span></p>
+        </div>
+        
+        <div class="buttons">
+            <a href="/meus_agendamentos" class="btn-primary">📋 Ver meus agendamentos</a>
+            <a href="/quadras" class="btn-secondary">🎮 Agendar mais</a>
+        </div>
+    </div>
+</body>
+</html>

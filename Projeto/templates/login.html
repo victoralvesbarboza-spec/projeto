@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DEAF Agendei+</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-container {
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+        }
+        .login-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 40px;
+            text-align: center;
+            color: white;
+        }
+        .login-header h1 { font-size: 2rem; margin-bottom: 10px; }
+        .login-header p { opacity: 0.9; }
+        .login-body { padding: 40px; }
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-login:hover { transform: translateY(-2px); }
+        .register-link { text-align: center; margin-top: 25px; }
+        .register-link a { color: #667eea; text-decoration: none; font-weight: 600; }
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+        }
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #eee;
+        }
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            color: #999;
+        }
+        .error {
+            background: #fee;
+            color: #e74c3c;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .demo-info {
+            background: #f0f2f5;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+        }
+        #googleButton {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🏆 Bem-vindo de volta!</h1>
+            <p>Faça login para continuar</p>
+        </div>
+        <div class="login-body">
+            {% if erro %}
+            <div class="error"><i class="fas fa-exclamation-circle"></i> {{ erro }}</div>
+            {% endif %}
+            
+            <form method="POST">
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" name="email" placeholder="E-mail" required value="victor@deaf.com">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="senha" placeholder="Senha" required value="123456">
+                </div>
+                <button type="submit" class="btn-login">Entrar <i class="fas fa-arrow-right"></i></button>
+            </form>
+            
+            <div class="divider">
+                <span>ou</span>
+            </div>
+            
+            <div id="googleButton"></div>
+            
+            <div class="register-link">
+                Não tem conta? <a href="/cadastro">Cadastre-se gratuitamente</a>
+            </div>
+            <div class="demo-info">
+                <i class="fas fa-info-circle"></i> Demo: victor@deaf.com / 123456
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CLIENT ID DO GOOGLE (COLOQUE SEU CLIENT ID AQUI)
+        const GOOGLE_CLIENT_ID = "693525104042-die9vd6lbq0qhehnhkvcdn496phu1ta.apps.googleusercontent.com";
+        
+        console.log("Client ID:", GOOGLE_CLIENT_ID);
+        
+        function handleCredentialResponse(response) {
+            console.log("Resposta do Google recebida");
+            
+            fetch('/google_login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential: response.credential })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/quadras';
+                } else {
+                    alert('Erro: ' + (data.error || 'Tente novamente'));
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao conectar com o servidor');
+            });
+        }
+        
+        // Inicializar o botão do Google
+        window.onload = function() {
+            if (typeof google !== 'undefined') {
+                google.accounts.id.initialize({
+                    client_id: GOOGLE_CLIENT_ID,
+                    callback: handleCredentialResponse
+                });
+                google.accounts.id.renderButton(
+                    document.getElementById("googleButton"),
+                    { 
+                        theme: "outline", 
+                        size: "large", 
+                        width: "100%",
+                        text: "continue_with",
+                        shape: "rectangular"
+                    }
+                );
+                console.log("Botão Google inicializado");
+            } else {
+                console.error("Google API não carregou");
+            }
+        };
+    </script>
+</body>
+</html>

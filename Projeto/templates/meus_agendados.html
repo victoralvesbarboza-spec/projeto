@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Agendamentos - DEAF Agendei+</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00b894;
+            text-decoration: none;
+        }
+        .menu a {
+            margin-left: 15px;
+            text-decoration: none;
+            color: #333;
+        }
+        .sair {
+            background: #e74c3c;
+            color: white !important;
+            padding: 5px 15px;
+            border-radius: 5px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .info {
+            flex: 1;
+        }
+        .info h3 {
+            margin: 0 0 10px 0;
+            color: #00b894;
+        }
+        .info p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .codigo {
+            background: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .status {
+            background: #d4edda;
+            color: #155724;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            display: inline-block;
+        }
+        .btn-cancelar {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-cancelar:hover {
+            background: #c0392b;
+        }
+        .empty {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 10px;
+        }
+        .empty .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        .btn-agendar {
+            background: #00b894;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .debug {
+            background: #fff3cd;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-size: 12px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="logo">🏆 DEAF Agendei+</a>
+        <div class="menu">
+            <span>Olá, {{ session.usuario_nome }}</span>
+            <a href="/quadras">Quadras</a>
+            <a href="/meus_agendamentos">Meus Agendamentos</a>
+            <a href="/perfil">Perfil</a>
+            <a href="/logout" class="sair">Sair</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2 class="title">📋 MEUS AGENDAMENTOS</h2>
+        
+        <div id="listaAgendamentos">
+            <!-- Os agendamentos serão carregados via JavaScript -->
+        </div>
+        
+        <div class="debug" id="debugInfo">
+            <strong>Debug:</strong> Aguardando dados...
+        </div>
+    </div>
+
+    <script>
+        // Buscar agendamentos via API
+        fetch('/api/meus_agendamentos')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Dados recebidos:', data);
+                
+                const container = document.getElementById('listaAgendamentos');
+                const debug = document.getElementById('debugInfo');
+                
+                if (data.erro) {
+                    container.innerHTML = `<div class="empty"><div class="icon">❌</div><h3>Erro: ${data.erro}</h3></div>`;
+                    debug.style.display = 'block';
+                    debug.innerHTML += `<br>Erro: ${data.erro}`;
+                    return;
+                }
+                
+                if (data.agendamentos && data.agendamentos.length > 0) {
+                    let html = '';
+                    for (let item of data.agendamentos) {
+                        html += `
+                            <div class="card">
+                                <div class="info">
+                                    <h3>🏟️ ${item.quadra_nome}</h3>
+                                    <p>📅 ${item.data} às ${item.horario}</p>
+                                    <p>💰 R$ ${item.valor_total}</p>
+                                    <p>🔑 <span class="codigo">${item.codigo}</span></p>
+                                    <p>📝 ${item.data_agendamento}</p>
+                                    <span class="status">✅ ${item.status}</span>
+                                </div>
+                                <div>
+                                    <button class="btn-cancelar" onclick="cancelar(${item.id})">Cancelar</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    container.innerHTML = html;
+                    debug.style.display = 'none';
+                } else {
+                    container.innerHTML = `
+                        <div class="empty">
+                            <div class="icon">🏃‍♂️</div>
+                            <h3>Você ainda não tem agendamentos</h3>
+                            <p>Que tal reservar uma quadra agora?</p>
+                            <a href="/quadras" class="btn-agendar">🎮 Ver quadras disponíveis →</a>
+                        </div>
+                    `;
+                }
+                
+                debug.style.display = 'block';
+                debug.innerHTML = `<strong>Debug:</strong> Total de agendamentos: ${data.agendamentos ? data.agendamentos.length : 0}<br>Dados: ${JSON.stringify(data, null, 2)}`;
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                document.getElementById('listaAgendamentos').innerHTML = `<div class="empty"><div class="icon">❌</div><h3>Erro ao carregar agendamentos</h3><p>${error.message}</p></div>`;
+                document.getElementById('debugInfo').style.display = 'block';
+                document.getElementById('debugInfo').innerHTML += `<br>Erro: ${error.message}`;
+            });
+        
+        function cancelar(id) {
+            if (confirm('Tem certeza que deseja cancelar este agendamento?')) {
+                fetch(`/api/cancelar_agendamento/${id}`, { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Agendamento cancelado!');
+                            location.reload();
+                        } else {
+                            alert('Erro ao cancelar: ' + data.erro);
+                        }
+                    });
+            }
+        }
+    </script>
+</body>
+</html>
