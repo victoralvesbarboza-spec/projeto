@@ -7,49 +7,17 @@
   },
   {
     "id": 2,
-    "nome": "victor hugo",
-    "email": "viihbarboza@gmail.com",
-    "senha": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
-  },
-  {
-    "id": 3,
-    "nome": "victor hugo",
-    "email": "hugviih@gmail.com",
-    "senha": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
-    "telefone": "43984446169",
-    "cidade": "Londrina",
-    "data_cadastro": "08/06/2026"
-  },
-  {
-    "id": 4,
-    "nome": "VICTOR BARBOZA",
-    "email": "viihbarboza457@gmail.com",
-    "senha": "8e9b669109df89620b94f2387dc53206a82ddc71d658f8f7a2b3a9b417370d3e",
-    "telefone": "4384446169",
-    "cidade": "LONDRINA",
-    "data_cadastro": "08/06/2026"
-  },
-  {
-    "id": 5,
-    "nome": "Administrador",
-    "email": "admin@deaf.com",
-    "senha": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
-    "telefone": "(11) 99999-0000",
-    "cidade": "São Paulo",
-    "data_cadastro": "01/01/2024",
-    "role": "admin"
-  },
-  {
-    "id": 6,
-    "nome": "victor",
-    "email": "hugviih@gamil.com",
-    "senha": "8e9b669109df89620b94f2387dc53206a82ddc71d658f8f7a2b3a9b417370d3e"
-  },
-  {
-    "id": 7,
     "nome": "victor",
     "email": "projeto@gmail.com",
     "senha": "8e9b669109df89620b94f2387dc53206a82ddc71d658f8f7a2b3a9b417370d3e",
-    "data_cadastro": "28/06/2026 14:35"
+    "data_cadastro": "28/06/2026 16:03"
   }
+,
+
+    {
+        "id": 1,
+        "nome": "Victor",
+        "email": "victor@deaf.com",
+        "senha": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+    }
 ]

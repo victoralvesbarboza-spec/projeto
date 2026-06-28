@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import json
 import os
 import hashlib
@@ -6,6 +6,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'deaf_agendei_chave_secreta_2024'
+app.config['SECRET_KEY'] = 'deaf_agendei_chave_secreta_2024'
 
 os.makedirs('dados', exist_ok=True)
 
@@ -90,6 +91,11 @@ inicializar_dados()
 
 @app.route('/')
 def index():
+    if 'usuario_id' in session:
+        if session.get('usuario_id') == 1 or session.get('usuario_email') == 'victor@deaf.com':
+            return redirect(url_for('admin_agendamentos'))
+        else:
+            return redirect(url_for('quadras'))
     return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -105,7 +111,12 @@ def login():
                 session['usuario_id'] = u['id']
                 session['usuario_nome'] = u['nome']
                 session['usuario_email'] = u['email']
-                return redirect(url_for('quadras'))
+                
+                # ADMIN vai para o painel admin
+                if u['id'] == 1 or u['email'] == 'victor@deaf.com':
+                    return redirect(url_for('admin_agendamentos'))
+                else:
+                    return redirect(url_for('quadras'))
         
         return render_template('login.html', erro='Email ou senha inválidos')
     
@@ -154,6 +165,10 @@ def quadras():
     if 'usuario_id' not in session:
         return redirect(url_for('login'))
     
+    # Se for admin, redireciona para o painel admin
+    if session['usuario_id'] == 1 or session.get('usuario_email') == 'victor@deaf.com':
+        return redirect(url_for('admin_agendamentos'))
+    
     quadras = carregar_dados('quadras')
     return render_template('quadras.html', quadras=quadras)
 
@@ -161,6 +176,11 @@ def quadras():
 def agendar(quadra_id):
     if 'usuario_id' not in session:
         return redirect(url_for('login'))
+    
+    # Admin não pode agendar, só ver
+    if session['usuario_id'] == 1 or session.get('usuario_email') == 'victor@deaf.com':
+        flash('❌ Administrador não pode agendar!', 'error')
+        return redirect(url_for('admin_agendamentos'))
     
     quadras = carregar_dados('quadras')
     quadra = None
@@ -252,12 +272,93 @@ def perfil():
     
     return render_template('perfil.html', usuario=usuario)
 
+# ============= ROTAS ADMIN =============
+
+@app.route('/admin/agendamentos')
+def admin_agendamentos():
+    if 'usuario_id' not in session:
+        flash('❌ Faça login para continuar!', 'error')
+        return redirect(url_for('login'))
+    
+    if session['usuario_id'] != 1 and session.get('usuario_email') != 'victor@deaf.com':
+        flash('❌ Acesso negado!', 'error')
+        return redirect(url_for('quadras'))
+    
+    agendamentos = carregar_dados('agendamentos')
+    agendamentos.reverse()
+    
+    usuarios = carregar_dados('usuarios')
+    quadras = carregar_dados('quadras')
+    
+    total_agendamentos = len(agendamentos)
+    total_usuarios = len(usuarios)
+    total_quadras = len(quadras)
+    
+    return render_template('admin_agendamentos.html', 
+                         agendamentos=agendamentos,
+                         total_agendamentos=total_agendamentos,
+                         total_usuarios=total_usuarios,
+                         total_quadras=total_quadras)
+
+@app.route('/admin/deletar_agendamento/<int:id>', methods=['POST'])
+def admin_deletar_agendamento(id):
+    if 'usuario_id' not in session:
+        flash('❌ Faça login para continuar!', 'error')
+        return redirect(url_for('login'))
+    
+    if session['usuario_id'] != 1 and session.get('usuario_email') != 'victor@deaf.com':
+        flash('❌ Acesso negado!', 'error')
+        return redirect(url_for('admin_agendamentos'))
+    
+    agendamentos = carregar_dados('agendamentos')
+    agendamento_encontrado = None
+    
+    for a in agendamentos:
+        if a['id'] == id:
+            agendamento_encontrado = a
+            break
+    
+    if not agendamento_encontrado:
+        flash('❌ Agendamento não encontrado!', 'error')
+        return redirect(url_for('admin_agendamentos'))
+    
+    agendamentos = [a for a in agendamentos if a['id'] != id]
+    salvar_dados('agendamentos', agendamentos)
+    
+    flash(f'✅ Agendamento de {agendamento_encontrado["quadra_nome"]} - {agendamento_encontrado["data"]} {agendamento_encontrado["horario"]} cancelado!', 'success')
+    
+    return redirect(url_for('admin_agendamentos'))
+
+@app.route('/admin/usuarios')
+def admin_usuarios():
+    if 'usuario_id' not in session:
+        flash('❌ Faça login para continuar!', 'error')
+        return redirect(url_for('login'))
+    
+    if session['usuario_id'] != 1 and session.get('usuario_email') != 'victor@deaf.com':
+        flash('❌ Acesso negado!', 'error')
+        return redirect(url_for('quadras'))
+    
+    usuarios = carregar_dados('usuarios')
+    agendamentos = carregar_dados('agendamentos')
+    
+    for u in usuarios:
+        u['agendamentos_count'] = len([a for a in agendamentos if a.get('usuario_id') == u['id']])
+    
+    total_usuarios = len(usuarios)
+    total_agendamentos = len(agendamentos)
+    
+    return render_template('admin_usuarios.html', 
+                         usuarios=usuarios,
+                         total_usuarios=total_usuarios,
+                         total_agendamentos=total_agendamentos)
+
 if __name__ == '__main__':
     print("\n" + "="*50)
     print("🏆 DEAF AGENDEI+")
     print("="*50)
     print("🚀 http://127.0.0.1:5000")
-    print("🔑 victor@deaf.com / 123456")
-    print("📋 Quadras disponíveis: Futebol, Vôlei e Basquete")
+    print("🔑 victor@deaf.com / 123456 (ADMIN)")
+    print("👑 Admin: http://127.0.0.1:5000/admin/agendamentos")
     print("="*50 + "\n")
     app.run(debug=True, host='0.0.0.0', port=5000)
